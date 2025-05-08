@@ -1,19 +1,16 @@
 
-self.addEventListener('install', function(e) {
+self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open('saskaitos').then(function(cache) {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/manifest.json'
-      ]);
-    })
+    caches.open('pwa-cache').then(cache => cache.addAll([
+      'index.html',
+      'manifest.json',
+      'service-worker.js',
+      'background.png'
+    ]))
   );
 });
-self.addEventListener('fetch', function(e) {
+self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(function(response) {
-      return response || fetch(e.request);
-    })
+    caches.match(e.request).then(response => response || fetch(e.request))
   );
 });
