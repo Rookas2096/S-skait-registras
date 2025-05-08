@@ -1,43 +1,61 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>Komunalinės paslaugos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Komunalinių paslaugų registras</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Paslaugų registravimas</h1>
-        <form id="serviceForm">
-            <input type="month" id="month" required />
-            <input type="text" id="service" placeholder="Paslauga" list="services" required />
-            <datalist id="services">
-                <option value="Šaltas vanduo"></option>
-                <option value="Karštas vanduo"></option>
-                <option value="Elektra"></option>
-                <option value="Šildymas"></option>
-            </datalist>
-            <input type="text" id="amount" placeholder="Kiekis arba kWh/m3" />
-            <input type="text" id="cost" placeholder="Suma (€)" />
-            <label><input type="checkbox" id="paid" /> Apmokėta</label>
-            <button type="submit">Įrašyti</button>
-        </form>
-        <table id="dataTable">
-            <thead>
-                <tr>
-                    <th>Mėnuo</th>
-                    <th>Paslauga</th>
-                    <th>Kiekis</th>
-                    <th>Suma</th>
-                    <th>Apmokėta</th>
-                    <th>Veiksmai</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+  <div class="container">
+    <h1>Komunalinių paslaugų registras</h1>
+    <form id="data-form">
+      <label for="month">Mėnuo:</label>
+      <input type="month" id="month" required />
+
+      <label for="service">Paslauga:</label>
+      <input list="services" id="service" placeholder="Paslauga" required />
+      <datalist id="services">
+        <option value="Šaltas vanduo">
+        <option value="Karštas vanduo">
+        <option value="Elektra">
+        <option value="Šildymas">
+        <option value="Dujos">
+        <option value="Administratorius">
+        <option value="Šiukšlės">
+      </datalist>
+
+      <label for="value">Suma:</label>
+      <input type="number" id="value" step="0.01" required />
+
+      <label for="paid">Apmokėta:</label>
+      <input type="checkbox" id="paid" />
+
+      <button type="submit">Įrašyti</button>
+    </form>
+
+    <div class="search-container">
+      <input type="text" id="search" placeholder="Ieškoti..." />
     </div>
-    <script src="app.js"></script>
+
+    <div id="summary"></div>
+    <div id="chart-container"><canvas id="summaryChart"></canvas></div>
+    <table id="data-table">
+      <thead>
+        <tr>
+          <th>Mėnuo</th>
+          <th>Paslauga</th>
+          <th>Suma</th>
+          <th>Apmokėta</th>
+          <th>Veiksmai</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
