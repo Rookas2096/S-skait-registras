@@ -1,0 +1,9 @@
+{
+  "name": "Komunalinės paslaugos",
+  "short_name": "Paslaugos",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1c1c1e",
+  "theme_color": "#1c1c1e",
+  "icons": []
+}
