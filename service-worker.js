@@ -1,16 +1,20 @@
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open('pwa-cache').then(cache => cache.addAll([
-      'index.html',
-      'manifest.json',
-      'service-worker.js',
-      'background.png'
-    ]))
-  );
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open('saskaitu-cache-v1').then(cache => {
+            return cache.addAll([
+                '/',
+                '/index.html',
+                '/app.js',
+                '/manifest.json'
+            ]);
+        })
+    );
 });
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
-  );
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request).then(response => {
+            return response || fetch(event.request);
+        })
+    );
 });
