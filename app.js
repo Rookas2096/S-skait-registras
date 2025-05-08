@@ -1,89 +1,72 @@
 
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector("form");
-    const tableBody = document.querySelector("#data-table tbody");
+let entries = JSON.parse(localStorage.getItem("bills")) || [];
+const form = document.getElementById("billForm");
+const tableBody = document.querySelector("#entriesTable tbody");
+const monthFilter = document.getElementById("monthFilter");
 
-    let editIndex = null;
+function saveEntries() {
+    localStorage.setItem("bills", JSON.stringify(entries));
+}
 
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const entry = {};
-        formData.forEach((value, key) => {
-            entry[key] = key === "apmoketa" ? form.elements[key].checked : value;
-        });
-
-        if (editIndex !== null) {
-            updateRow(editIndex, entry);
-            editIndex = null;
-        } else {
-            addRow(entry);
-        }
-
-        form.reset();
-    });
-
-    function addRow(data) {
-        const row = tableBody.insertRow();
+function renderEntries() {
+    tableBody.innerHTML = "";
+    const filter = monthFilter.value;
+    entries.forEach((entry, index) => {
+        if (filter && !entry.date.startsWith(filter)) return;
+        const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${data.menuo}</td>
-            <td>${data.elektra} (${data.elektra_suma})</td>
-            <td>${data.karstas} (${data.karstas_suma})</td>
-            <td>${data.saltas} (${data.saltas_suma})</td>
-            <td>${data.siluma} (${data.siluma_suma})</td>
-            <td>${data.dujos} (${data.dujos_suma})</td>
-            <td>${data.administravimas}</td>
-            <td>${data.siuksles}</td>
-            <td>${calculateTotal(data)}</td>
-            <td>${data.apmoketa ? "Taip" : "Ne"}</td>
+            <td>${entry.date}</td>
+            <td>${entry.service}</td>
+            <td>${entry.quantity}</td>
+            <td>${entry.amount}</td>
+            <td>${entry.paid ? "Taip" : "Ne"}</td>
             <td>
-                <button onclick="editRow(this)">Redaguoti</button>
-                <button onclick="deleteRow(this)">Ištrinti</button>
+                <button onclick="editEntry(${index})">Redaguoti</button>
             </td>
         `;
-    }
+        tableBody.appendChild(row);
+    });
+}
 
-    window.editRow = function (button) {
-        const row = button.closest("tr");
-        const cells = row.children;
-        form.menuo.value = cells[0].innerText;
-        form.elektra.value = cells[1].innerText.split(" ")[0];
-        form.elektra_suma.value = cells[1].innerText.split(" ")[1].slice(1, -1);
-        form.karstas.value = cells[2].innerText.split(" ")[0];
-        form.karstas_suma.value = cells[2].innerText.split(" ")[1].slice(1, -1);
-        form.saltas.value = cells[3].innerText.split(" ")[0];
-        form.saltas_suma.value = cells[3].innerText.split(" ")[1].slice(1, -1);
-        form.siluma.value = cells[4].innerText.split(" ")[0];
-        form.siluma_suma.value = cells[4].innerText.split(" ")[1].slice(1, -1);
-        form.dujos.value = cells[5].innerText.split(" ")[0];
-        form.dujos_suma.value = cells[5].innerText.split(" ")[1].slice(1, -1);
-        form.administravimas.value = cells[6].innerText;
-        form.siuksles.value = cells[7].innerText;
-        form.apmoketa.checked = cells[9].innerText === "Taip";
-        editIndex = row.rowIndex - 1;
+form.onsubmit = (e) => {
+    e.preventDefault();
+    const newEntry = {
+        date: document.getElementById("date").value,
+        service: document.getElementById("service").value,
+        quantity: document.getElementById("quantity").value,
+        amount: document.getElementById("amount").value,
+        paid: document.getElementById("paid").checked
     };
-
-    window.deleteRow = function (button) {
-        const row = button.closest("tr");
-        tableBody.deleteRow(row.rowIndex - 1);
-    };
-
-    function updateRow(index, data) {
-        const row = tableBody.rows[index];
-        row.cells[0].innerText = data.menuo;
-        row.cells[1].innerText = `${data.elektra} (${data.elektra_suma})`;
-        row.cells[2].innerText = `${data.karstas} (${data.karstas_suma})`;
-        row.cells[3].innerText = `${data.saltas} (${data.saltas_suma})`;
-        row.cells[4].innerText = `${data.siluma} (${data.siluma_suma})`;
-        row.cells[5].innerText = `${data.dujos} (${data.dujos_suma})`;
-        row.cells[6].innerText = data.administravimas;
-        row.cells[7].innerText = data.siuksles;
-        row.cells[8].innerText = calculateTotal(data);
-        row.cells[9].innerText = data.apmoketa ? "Taip" : "Ne";
+    if (form.dataset.editing !== undefined) {
+        entries[form.dataset.editing] = newEntry;
+        delete form.dataset.editing;
+    } else {
+        entries.push(newEntry);
     }
+    saveEntries();
+    renderEntries();
+    form.reset();
+};
 
-    function calculateTotal(data) {
-        const sumFields = ["elektra_suma", "karstas_suma", "saltas_suma", "siluma_suma", "dujos_suma", "administravimas", "siuksles"];
-        return sumFields.reduce((acc, key) => acc + (parseFloat(data[key]) || 0), 0).toFixed(2);
-    }
-});
+function editEntry(index) {
+    const entry = entries[index];
+    document.getElementById("date").value = entry.date;
+    document.getElementById("service").value = entry.service;
+    document.getElementById("quantity").value = entry.quantity;
+    document.getElementById("amount").value = entry.amount;
+    document.getElementById("paid").checked = entry.paid;
+    form.dataset.editing = index;
+}
+
+monthFilter.oninput = renderEntries;
+
+document.getElementById("exportPdf").onclick = () => {
+    const rows = [["Data", "Paslauga", "Kiekis", "Suma", "Apmokėta"]].concat(
+        entries.map(e => [e.date, e.service, e.quantity, e.amount, e.paid ? "Taip" : "Ne"])
+    );
+    const doc = new window.jspdf.jsPDF();
+    doc.autoTable({ head: [rows[0]], body: rows.slice(1) });
+    doc.save("saskaitos.pdf");
+};
+
+renderEntries();
