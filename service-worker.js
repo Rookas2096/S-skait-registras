@@ -1,22 +1,22 @@
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open('v1').then(cache => {
-      return cache.addAll([
-        '/',
-        '/index.html',
-        '/style.css',
-        '/script.js',
-        '/manifest.json',
-        '/icons/icon-192.png'
-      ]);
-    })
-  );
+    event.waitUntil(
+        caches.open('saskaitos-cache').then(cache => {
+            return cache.addAll([
+                '/',
+                '/index.html',
+                '/style.css',
+                '/app.js',
+                '/manifest.json',
+                '/bg.jpg'
+            ]);
+        })
+    );
 });
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
+    event.respondWith(
+        caches.match(event.request).then(response => {
+            return response || fetch(event.request);
+        })
+    );
 });
