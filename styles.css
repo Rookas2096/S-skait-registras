@@ -1,0 +1,37 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('background.png');
+    background-size: cover;
+    background-position: center;
+    color: #333;
+}
+.container {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 700px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+form, .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+form input, form button, .filter input, .filter button {
+    padding: 10px;
+    flex: 1;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
