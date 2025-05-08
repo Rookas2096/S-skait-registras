@@ -1,0 +1,16 @@
+
+{
+  "name": "Sąskaitų registras",
+  "short_name": "Sąskaitos",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f4f4f9",
+  "theme_color": "#007BFF",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}

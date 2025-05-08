@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Sąskaitų registras</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: auto;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: inline-block;
+            margin: 5px 10px 10px 0;
+        }
+        input[type="number"], input[type="text"], input[type="month"] {
+            width: 100px;
+            padding: 5px;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+        button {
+            padding: 8px 16px;
+            font-weight: bold;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 30px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .paid {
+            background-color: #c8f7c5;
+        }
+        .unpaid {
+            background-color: #f9c0c0;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .actions button {
+            margin: 2px;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registration successful:', registration.scope);
+            })
+            .catch(function(error) {
+                console.log('ServiceWorker registration failed:', error);
+            });
+        }
+    </script>
+    </head>
+    
+<body>
+<h2>Sąskaitų registras</h2>
+<form id="billForm">
+    <input type="hidden" id="editIndex" value="">
+    <label>Mėnuo: <input type="month" id="date" required></label><br><br>
+    <label>Elektra (kWh): <input type="number" id="elektra_kwh" step="any"></label>
+    <label>Suma: <input type="number" id="elektra_suma" step="any"></label><br>
+    <label>Karštas vanduo (m³): <input type="number" id="kv_m3" step="any"></label>
+    <label>Suma: <input type="number" id="kv_suma" step="any"></label><br>
+    <label>Šaltas vanduo (m³): <input type="text" id="sv_m3"></label>
+    <label>Suma: <input type="number" id="sv_suma" step="any"></label><br>
+    <label>Šiluma (suma): <input type="number" id="siluma" step="any"></label>
+    <label>Dujos (m³): <input type="number" id="dujos_m3" step="any"></label>
+    <label>Suma: <input type="number" id="dujos_suma" step="any"></label><br>
+    <label>Administratorius: <input type="number" id="admin" step="any"></label>
+    <label>Šiukšlės: <input type="number" id="siuksles" step="any"></label><br><br>
+    <label>Apmokėta: <input type="checkbox" id="paid"></label><br><br>
+    <button type="submit">Įrašyti</button>
+    <div class="error" id="errorMsg"></div>
+</form>
+
+<table id="billsTable">
+    <thead>
+        <tr>
+            <th>Mėnuo</th><th>Elektra</th><th>K. Vanduo</th><th>Š. Vanduo</th><th>Šiluma</th>
+            <th>Dujos</th><th>Administratorius</th><th>Šiukšlės</th><th>Viso</th><th>Apmokėta</th><th>Veiksmai</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+function loadBills() {
+    const tbody = document.querySelector("#billsTable tbody");
+    tbody.innerHTML = "";
+    const bills = JSON.parse(localStorage.getItem("bills") || "[]");
+    bills.forEach((bill, index) => {
+        const tr = document.createElement("tr");
+        tr.className = bill.paid ? "paid" : "unpaid";
+        const total = [bill.elektra_suma, bill.kv_suma, bill.sv_suma, bill.siluma, bill.dujos_suma, bill.admin, bill.siuksles]
+            .map(parseFloat).filter(x => !isNaN(x)).reduce((a,b) => a + b, 0).toFixed(2);
+        tr.innerHTML = `
+            <td>${bill.date}</td>
+            <td>${bill.elektra_kwh || ""} (${bill.elektra_suma || ""})</td>
+            <td>${bill.kv_m3 || ""} (${bill.kv_suma || ""})</td>
+            <td>${bill.sv_m3 || ""} (${bill.sv_suma || ""})</td>
+            <td>${bill.siluma || ""}</td>
+            <td>${bill.dujos_m3 || ""} (${bill.dujos_suma || ""})</td>
+            <td>${bill.admin || ""}</td>
+            <td>${bill.siuksles || ""}</td>
+            <td>${total}</td>
+            <td>${bill.paid ? "Taip" : "Ne"}</td>
+            <td class="actions">
+                <button onclick="editBill(${index})">Redaguoti</button>
+                <button onclick="deleteBill(${index})">Trinti</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function editBill(index) {
+    const bills = JSON.parse(localStorage.getItem("bills") || "[]");
+    const bill = bills[index];
+    document.getElementById("editIndex").value = index;
+    document.getElementById("date").value = bill.date;
+    document.getElementById("elektra_kwh").value = bill.elektra_kwh;
+    document.getElementById("elektra_suma").value = bill.elektra_suma;
+    document.getElementById("kv_m3").value = bill.kv_m3;
+    document.getElementById("kv_suma").value = bill.kv_suma;
+    document.getElementById("sv_m3").value = bill.sv_m3;
+    document.getElementById("sv_suma").value = bill.sv_suma;
+    document.getElementById("siluma").value = bill.siluma;
+    document.getElementById("dujos_m3").value = bill.dujos_m3;
+    document.getElementById("dujos_suma").value = bill.dujos_suma;
+    document.getElementById("admin").value = bill.admin;
+    document.getElementById("siuksles").value = bill.siuksles;
+    document.getElementById("paid").checked = bill.paid;
+}
+
+function deleteBill(index) {
+    const bills = JSON.parse(localStorage.getItem("bills") || "[]");
+    bills.splice(index, 1);
+    localStorage.setItem("bills", JSON.stringify(bills));
+    loadBills();
+}
+
+document.getElementById("billForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const dateVal = document.getElementById("date").value;
+    if (!dateVal) {
+        document.getElementById("errorMsg").innerText = "Pasirink mėnesį prieš įrašant.";
+        return;
+    } else {
+        document.getElementById("errorMsg").innerText = "";
+    }
+
+    const bill = {
+        date: dateVal,
+        elektra_kwh: document.getElementById("elektra_kwh").value,
+        elektra_suma: document.getElementById("elektra_suma").value,
+        kv_m3: document.getElementById("kv_m3").value,
+        kv_suma: document.getElementById("kv_suma").value,
+        sv_m3: document.getElementById("sv_m3").value,
+        sv_suma: document.getElementById("sv_suma").value,
+        siluma: document.getElementById("siluma").value,
+        dujos_m3: document.getElementById("dujos_m3").value,
+        dujos_suma: document.getElementById("dujos_suma").value,
+        admin: document.getElementById("admin").value,
+        siuksles: document.getElementById("siuksles").value,
+        paid: document.getElementById("paid").checked
+    };
+
+    const bills = JSON.parse(localStorage.getItem("bills") || "[]");
+    const editIndex = document.getElementById("editIndex").value;
+    if (editIndex !== "") {
+        bills[editIndex] = bill;
+    } else {
+        bills.push(bill);
+    }
+
+    localStorage.setItem("bills", JSON.stringify(bills));
+    loadBills();
+    this.reset();
+    document.getElementById("editIndex").value = "";
+});
+
+window.onload = loadBills;
+</script>
+</body>
+</html>
