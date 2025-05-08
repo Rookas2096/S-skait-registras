@@ -1,9 +1,0 @@
-{
-  "name": "Buitinių sąskaitų apskaita",
-  "short_name": "Sąskaitos",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "icons": []
-}
