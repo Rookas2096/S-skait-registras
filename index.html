@@ -3,41 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#ffffff"/>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
     <title>Sąskaitų registras</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+      }
+    </script>
 </head>
 <body>
-    <div class="container">
-        <h1>2025 m. gegužė</h1>
-        <form id="billForm">
-            <label for="service">Paslauga:</label>
-            <select id="service">
-                <option>Administratorius</option>
-                <option>Šaltas vanduo</option>
-                <option>Šiluma</option>
-                <option>Dujos</option>
-                <option>Šiukšlės</option>
-            </select>
-            <label for="amount">Suma:</label>
-            <input type="number" id="amount" required>
-            <label><input type="checkbox" id="paid"> Apmokėta</label>
-            <button type="submit">Įrašyti</button>
-        </form>
-        <section id="summary">
-            <h2>Mėnesio suvestinė</h2>
-            <p id="monthTotal">2025 m. gegužė: 0.00 €</p>
-            <canvas id="chart"></canvas>
-        </section>
-        <table id="entries">
-            <thead>
-                <tr><th>Mėnuo</th><th>Paslauga</th><th>Suma</th><th>Apmokėta</th><th>Veiksmai</th></tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js"></script>
+    <h1>Sąskaitų registras</h1>
+    <form id="invoiceForm">
+        <label>Data: <input type="month" id="date" required></label>
+        <label>Elektra (kWh): <input type="number" id="elektra_kwh"></label>
+        <label>Elektra (suma): <input type="number" id="elektra_suma" step="0.01"></label>
+        <label>Šildymas: <input type="number" id="sildymas" step="0.01"></label>
+        <label>Karštas vanduo (m³): <input type="number" id="kvanduo_m3" step="0.01"></label>
+        <label>Karštas vanduo (suma): <input type="number" id="kvanduo_suma" step="0.01"></label>
+        <label>Šaltas vanduo (m³): <input type="number" id="svanduo_m3" step="0.01"></label>
+        <label>Šaltas vanduo (suma): <input type="number" id="svanduo_suma" step="0.01"></label>
+        <label>Dujos (m³): <input type="number" id="dujos_m3" step="0.01"></label>
+        <label>Dujos (suma): <input type="number" id="dujos_suma" step="0.01"></label>
+        <label>Administratorius: <input type="number" id="adminas" step="0.01"></label>
+        <label>Šiukšlės: <input type="number" id="siuksles" step="0.01"></label>
+        <label>Apmokėta: <input type="checkbox" id="apmoketa"></label>
+        <button type="submit">Išsaugoti</button>
+    </form>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Elektra</th>
+                <th>Šildymas</th>
+                <th>K. Vanduo</th>
+                <th>Š. Vanduo</th>
+                <th>Dujos</th>
+                <th>Admin.</th>
+                <th>Šiukšlės</th>
+                <th>Suma</th>
+                <th>Apmokėta</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script src="script.js"></script>
 </body>
 </html>
